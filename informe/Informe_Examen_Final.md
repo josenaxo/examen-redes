@@ -89,6 +89,8 @@ Se asignó el bloque **172.16.40.0/22** (1024 direcciones). Con VLSM, las subred
 | 4 | Servidores / Mgmt | 10 | 4 | 14 | /28 |
 | 5–9 | Enlaces punto a punto (×5) | 2 | 2 | 2 | /30 |
 
+> **Nota:** para la LAN de Valparaíso (/27, 30 direcciones útiles) se consideró el gateway dentro de los 30 hosts requeridos, el mismo criterio del Certamen 1, donde el enunciado indicaba "dispositivos (hosts + gateway)".
+
 ### 2.3 Tabla de direccionamiento
 
 | Subred | Red / prefijo | Máscara | Rango usable | Gateway / extremos | Broadcast |
@@ -132,9 +134,11 @@ Detalle completo: `evidencias/tabla_vlsm.md`. Verificación de interfaces: `E2_0
 | Ruta **flotante** de respaldo | `ip route 0.0.0.0 0.0.0.0 <vecino inter-sucursal> 210` | Salida alternativa si cae el enlace con el ISP. |
 | Resumen en el ISP | `ip route 172.16.40.0 255.255.252.0 172.16.40.146 250` | Último respaldo del ISP hacia la empresa si OSPF dejara de anunciar alguna red. |
 
-**Por qué se combinan.** OSPF resuelve el problema interno: conoce la topología completa y recalcula los caminos solo cuando cambia un enlace. Las rutas estáticas controlan de forma explícita y predecible la salida hacia un proveedor externo. En una red real, el proveedor no participa del OSPF de la empresa.
+**Por qué se combinan.** En este diseño, y como exige el enunciado, el ISP **sí participa en OSPF** (área 0, Router-ID 1.1.1.1). Los cuatro routers intercambian por OSPF todas las **redes internas** de la empresa (LAN, red de servidores y enlaces /30): conocen la topología completa y recalculan los caminos solos cuando cambia un enlace. Gracias a eso, el ISP aprende por OSPF cómo devolver el tráfico hacia cada sede, incluso cuando un enlace WAN cae.
 
-La Loopback 8.8.8.8 del ISP **no se anuncia** por OSPF. Representa Internet, por lo que se alcanza mediante la ruta por defecto. Si se anunciara, aparecería como ruta `O`, más específica, y la ruta estática por defecto no se usaría.
+La **salida a Internet** (8.8.8.8), en cambio, se controla con **rutas estáticas por defecto**: cada sucursal apunta a su propio ISP (AD 1) y tiene una ruta flotante de respaldo por el enlace inter-sucursal (AD 210). Así el camino hacia Internet es explícito y predecible, y no depende de lo que anuncie el proveedor.
+
+Por eso la Loopback 8.8.8.8 del ISP **no se anuncia** por OSPF. Representa Internet y se alcanza mediante la ruta por defecto. Si se anunciara, aparecería como ruta `O`, más específica, y la ruta estática por defecto nunca se usaría para llegar a ella.
 
 **Cálculo de costos** (ancho de banda de referencia de 100 Mbps: GigabitEthernet = 1, serial 1544 kbps = 64):
 - Santiago → LAN Concepción por los enlaces inter-sucursales: 64 + 1 + 1 = **66**.
@@ -499,11 +503,11 @@ Detalle: `evidencias/problemas.md`.
 
 ## 11. Referencias
 
-Cisco Networking Academy. (s.f.). *CCNA: Enterprise networking, security, and automation* [Curso en línea]. Cisco Systems. https://www.netacad.com [VERIFICAR: edición/versión del curso cursado]
+Cisco Networking Academy. (s.f.). *CCNA: Introducción a las redes* [Curso en línea]. Cisco Systems. https://www.netacad.com/es/courses/ccna-introduction-networks
 
-Cisco Systems. (s.f.). *IP routing: OSPF configuration guide* [Documentación de Cisco IOS]. https://www.cisco.com [VERIFICAR: URL exacta y versión de IOS]
+Cisco Systems. (s.f.-a). Configuring OSPF. En *IP Routing: OSPF Configuration Guide, Cisco IOS Release 15SY*. https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/iproute_ospf/configuration/15-sy/iro-15-sy-book/iro-cfg.html
 
-Cisco Systems. (s.f.). *Security configuration guide: Secure Shell* [Documentación de Cisco IOS]. https://www.cisco.com [VERIFICAR: URL exacta y versión de IOS]
+Cisco Systems. (s.f.-b). Configuring Secure Shell. En *Secure Shell Configuration Guide, Cisco IOS Release 15M&T*. https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_usr_ssh/configuration/15-mt/sec-usr-ssh-15-mt-book/sec-usr-ssh-sec-shell.pdf
 
 Fuller, V., & Li, T. (2006). *Classless inter-domain routing (CIDR): The Internet address assignment and aggregation plan* (RFC 4632). Internet Engineering Task Force. https://doi.org/10.17487/RFC4632
 

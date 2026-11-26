@@ -8,18 +8,19 @@
 
 | Estado | Cantidad |
 |---|---|
-| ✅ OK | 73 |
-| ✅ OK parcial (falta un detalle del estudiante) | 2 |
+| ✅ OK | 75 |
+| ✅ OK parcial (falta un detalle del estudiante) | 1 |
 | ⚠️ FALTA | 2 |
-| ⏳ PENDIENTE-AWS | 9 |
-| **Total requisitos revisados** | **86** |
+| ⏳ PENDIENTE-AWS | 12 |
+| **Total requisitos revisados** | **90** (incluye 10 de la Parte 2 y el criterio de rúbrica "diagramas claros") |
 
 **Lo que falta hacer (no AWS):**
 1. ⚠️ Completar nombre y RUT en la portada del informe.
 2. ⚠️ Escribir el **análisis personal** (10.2) y las **conclusiones** (10.3) del informe.
-3. ⚠️ Verificar las 3 referencias marcadas [VERIFICAR] (curso NetAcad y guías de Cisco IOS).
 
 ✅ Resuelto: captura limpia de SSH Valparaíso → R-Santiago repetida desde PC-Valparaiso-2 (`E6_01`).
+✅ Resuelto: las 3 referencias [VERIFICAR] se reemplazaron por fuentes verificadas (informe y documentacion.html, también en el servidor).
+✅ Resuelto: captura de topología E1_01 retomada con todos los enlaces en verde y la etiqueta Valpo-Conce junto a su enlace.
 
 ---
 
@@ -84,13 +85,26 @@
 
 | # | Requisito | Estado | Evidencia |
 |---|---|---|---|
-| 2.1 | VMs en AWS (instancias, red, grupos de seguridad) | ⏳ PENDIENTE-AWS | – |
-| 2.2 | Controlador de dominio AD / Samba (IP reservada .132) | ⏳ PENDIENTE-AWS | IP reservada en tabla_vlsm.md |
-| 2.3 | Clientes unidos al dominio | ⏳ PENDIENTE-AWS | – |
-| 2.4 | OU, usuarios y grupos | ⏳ PENDIENTE-AWS | – |
-| 2.5 | GPO / políticas aplicadas y justificadas | ⏳ PENDIENTE-AWS | – |
-| 2.6 | Informe §5 Diseño e implementación del dominio | ⏳ PENDIENTE-AWS | Estructura lista en el informe |
-| 2.7 | Informe §6 Políticas aplicadas y justificación | ⏳ PENDIENTE-AWS | Estructura lista en el informe |
+| 2.1 | Dominio implementado en máquinas virtuales en AWS (instancias, red, grupos de seguridad) | ⏳ PENDIENTE-AWS | – |
+| 2.2 | Controlador de dominio Active Directory o Samba AD | ⏳ PENDIENTE-AWS | IP reservada 172.16.40.132 en tabla_vlsm.md |
+| 2.3 | **5 OUs:** Gerencia, Recursos Humanos, Finanzas, Informática, Operaciones/Logística | ⏳ PENDIENTE-AWS | – |
+| 2.4 | **2 usuarios por departamento** (10 en total) | ⏳ PENDIENTE-AWS | – |
+| 2.5 | **1 grupo de seguridad por departamento** (5 en total) | ⏳ PENDIENTE-AWS | – |
+| 2.6 | **Al menos 2 políticas de seguridad y continuidad** (por ejemplo, GPO de contraseñas/bloqueo de cuenta y política de respaldo o bloqueo de pantalla), justificadas | ⏳ PENDIENTE-AWS | Informe §6 (estructura) |
+| 2.7 | **Unión de al menos un cliente** al dominio | ⏳ PENDIENTE-AWS | – |
+| 2.8 | **Validación de autenticación** de un usuario del dominio en el cliente | ⏳ PENDIENTE-AWS | – |
+| 2.9 | **DNS del dominio** funcionando (resolución del dominio y del DC desde el cliente) | ⏳ PENDIENTE-AWS | – |
+| 2.10 | **Demostración práctica obligatoria** del dominio | ⏳ PENDIENTE-AWS | Agregar sección al guion_demo.md al completar la Parte 2 |
+
+Informe: §5 "Diseño e implementación del dominio" y §6 "Políticas aplicadas y justificación" se controlan en la Parte 5 (5.8 y 5.9).
+
+---
+
+## Criterios transversales de la rúbrica
+
+| # | Criterio | Estado | Evidencia |
+|---|---|---|---|
+| R.1 | **Diagramas claros** | ✅ | E1_01 (versión corregida): topología con todos los enlaces en verde, cada sede rotulada, red de cada LAN y de cada enlace /30 (incluida "Valpo-Conce 172.16.40.160/30" junto a su enlace). E6_12 / E6_13 muestran el diagrama durante y después de la falla. Figura 1 del informe. |
 
 ---
 
@@ -151,7 +165,7 @@
 | 5.12 | Problemas encontrados y soluciones | ✅ | §9 (10 casos), problemas.md |
 | 5.13 | Análisis de resultados | ✅ parcial | §10.1 con datos medidos; §10.2 análisis personal ⚠️ FALTA |
 | 5.14 | Conclusiones técnicas | ⚠️ FALTA | §10.3 [COMPLETAR POR EL ESTUDIANTE] |
-| 5.15 | Referencias APA 7 reales | ✅ parcial | 6 RFC con DOI verificables; 3 marcadas ⚠️ [VERIFICAR] |
+| 5.15 | Referencias APA 7 reales | ✅ | 6 RFC con DOI + 3 fuentes Cisco verificadas en revisión externa (NetAcad "CCNA: Introducción a las redes", guía SSH 15M&T y guía OSPF 15SY) |
 | 5.16 | Cada captura insertada con explicación técnica | ✅ | 32 figuras con leyenda |
 | 5.17 | Versión .docx | ✅ | informe/Informe_Examen_Final.docx (32 imágenes embebidas, 31 páginas) |
 

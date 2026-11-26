@@ -154,7 +154,7 @@ Es la "confiabilidad" del origen de una ruta: cuando dos fuentes ofrecen el mism
 Es una ruta estática con una AD mayor que la principal (210 frente a 1). No se instala mientras la principal exista; si la principal cae, "flota" a la tabla de rutas. La probé con `shutdown` en el enlace ISP–Concepción: la ruta por defecto pasó a `S* [210/0] via 172.16.40.161` y el tracert empezó a pasar por Valparaíso.
 
 **7. ¿Por qué combinar OSPF y rutas estáticas?**
-OSPF resuelve la red interna: aprende todas las redes solo y reconverge si cae un enlace. La salida a Internet se controla mejor con estáticas, porque el proveedor no participa del OSPF de la empresa y así el camino es explícito y predecible. La ruta flotante agrega el respaldo.
+Los cuatro routers, **incluido el ISP**, corren OSPF en el área 0 (lo exige el enunciado). Por OSPF se intercambian las redes internas: cada router aprende las LAN, la red de servidores y los /30, y reconverge solo si cae un enlace; así el ISP sabe devolver el tráfico a cada sede. La salida a Internet (8.8.8.8) se controla con rutas estáticas por defecto hacia el ISP de cada sede, más la flotante AD 210 de respaldo, para que ese camino sea explícito y predecible. Por eso la Loopback 8.8.8.8 no se anuncia en OSPF.
 
 **8. ¿Para qué el `ip ospf cost 100` en los enlaces del ISP?**
 Sin él, OSPF podría preferir pasar por el ISP para ir de una sede a otra (Gigabit tiene costo 1). Con costo 100, el camino Santiago→Concepción por el ISP cuesta 201 y por Valparaíso 66, así que el tráfico interno usa los enlaces propios. Se ve en el tracert.

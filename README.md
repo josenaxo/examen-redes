@@ -17,7 +17,6 @@ Diseño, implementación y continuidad de la red corporativa de **ApexLogística
 | `evidencias/checklist_rubrica.md` | Autocontrol de requisitos |
 | `evidencias/guion_demo.md` | Guion de la demostración y preguntas frecuentes |
 | `web/` | Fuente del sitio publicado en SRV-Principal (`index.html`, `documentacion.html`) |
-| `evidencias_respaldo_antes_renombre/` | Copia de las evidencias con la nomenclatura anterior (`P1_`…`P6_`) |
 
 ## Resumen técnico
 
