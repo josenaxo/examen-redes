@@ -1,0 +1,32 @@
+=== Etapa 5 - DNS en SRV-Principal (172.16.40.130) ===
+
+Services > DNS: ON
+Registros A creados (verificados en la base del servidor: stored = true):
+  www.apexlogistica.local   A   172.16.40.130
+  srv.apexlogistica.local   A   172.16.40.130
+
+Todos los equipos tienen DNS = 172.16.40.130 (configurado en la Etapa 2).
+
+=== nslookup desde las 3 sedes (salida real) ===
+
+PC-Santiago-1> nslookup www.apexlogistica.local
+Server: [172.16.40.130]
+Address:  172.16.40.130
+Non-authoritative answer:
+Name:   www.apexlogistica.local
+Address:   172.16.40.130
+
+PC-Valparaiso-1> nslookup srv.apexlogistica.local
+Server: [172.16.40.130]
+Address:  172.16.40.130
+Non-authoritative answer:
+Name:   srv.apexlogistica.local
+Address:   172.16.40.130
+
+PC-Concepcion-1> nslookup www.apexlogistica.local
+Server: [172.16.40.130]
+Address:  172.16.40.130
+Non-authoritative answer:
+Name:   www.apexlogistica.local
+Address:   172.16.40.130
+(La primera consulta desde Concepcion vencio por timeout mientras se resolvia ARP; la segunda respondio. Ver problemas.md #7.)

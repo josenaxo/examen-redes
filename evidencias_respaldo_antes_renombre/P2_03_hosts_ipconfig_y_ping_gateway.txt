@@ -1,0 +1,30 @@
+=== Etapa 2 - Configuracion IP de hosts (lectura real) ===
+
+PC-Santiago-1> ipconfig /all
+   IPv4 Address....: 172.16.40.2
+   Subnet Mask.....: 255.255.255.192
+   Default Gateway.: 172.16.40.1
+   DNS Servers.....: 172.16.40.130
+
+SRV-Principal> ipconfig /all
+   IPv4 Address....: 172.16.40.130
+   Subnet Mask.....: 255.255.255.240
+   Default Gateway.: 172.16.40.129
+   DNS Servers.....: 172.16.40.130
+
+Configuracion aplicada a cada host (leida de vuelta por la herramienta):
+Host              IP              Mascara            Gateway         DNS
+PC-Santiago-1     172.16.40.2     255.255.255.192    172.16.40.1     172.16.40.130
+PC-Santiago-2     172.16.40.3     255.255.255.192    172.16.40.1     172.16.40.130
+SRV-Principal     172.16.40.130   255.255.255.240    172.16.40.129   172.16.40.130
+ADMIN             172.16.40.131   255.255.255.240    172.16.40.129   172.16.40.130
+PC-Valparaiso-1   172.16.40.66    255.255.255.224    172.16.40.65    172.16.40.130
+PC-Valparaiso-2   172.16.40.67    255.255.255.224    172.16.40.65    172.16.40.130
+PC-Concepcion-1   172.16.40.98    255.255.255.224    172.16.40.97    172.16.40.130
+PC-Concepcion-2   172.16.40.99    255.255.255.224    172.16.40.97    172.16.40.130
+
+=== Ping al gateway ===
+PC-Santiago-2   -> 172.16.40.1    4/4 recibidos, 0% perdida, TTL=255
+ADMIN           -> 172.16.40.129  4/4 recibidos, 0% perdida, TTL=255
+PC-Valparaiso-2 -> 172.16.40.65   4/4 recibidos, 0% perdida, TTL=255
+PC-Concepcion-2 -> 172.16.40.97   4/4 recibidos, 0% perdida, TTL=255

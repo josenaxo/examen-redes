@@ -1,0 +1,20 @@
+=== Etapa 5 - Servidor web en SRV-Principal ===
+
+Services > HTTP: ON (puerto 80)
+Paginas cargadas (copia fuente en ../web/):
+  index.html          2065 bytes  - Inicio ApexLogistica SpA (quienes somos, sedes, servicios, enlace a documentacion)
+  documentacion.html  7757 bytes  - Documentacion Tecnica / Investigacion (VLSM, estatico+OSPF, SSH,
+                                    AD/Samba/GPO, plan de continuidad, referencias APA 7)
+
+=== Prueba desde el Web Browser de 1 PC por sede (resultado real) ===
+Equipo            URL                                                    Bytes  Resultado
+PC-Santiago-1     http://www.apexlogistica.local                         2065   OK - "ApexLogistica SpA ... Quienes somos"
+PC-Santiago-1     http://www.apexlogistica.local/documentacion.html      7757   OK - "Documentacion Tecnica / Investigacion"
+PC-Valparaiso-1   http://www.apexlogistica.local                         2065   OK
+PC-Valparaiso-1   http://www.apexlogistica.local/documentacion.html      7757   OK
+PC-Concepcion-1   http://www.apexlogistica.local                         2065   OK
+PC-Concepcion-1   http://www.apexlogistica.local/documentacion.html      7757   OK
+
+Flujo: el navegador consulta al DNS 172.16.40.130 por www.apexlogistica.local -> recibe el registro A
+172.16.40.130 -> abre una conexion TCP al puerto 80 del mismo servidor -> HTTP GET de la pagina.
+Desde Valparaiso y Concepcion el trafico llega a la red de servidores por los enlaces inter-sucursales (OSPF).

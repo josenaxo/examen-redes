@@ -1,0 +1,49 @@
+=== Etapa 6 - Soporte remoto por SSH (salida real) ===
+Credenciales: usuario admin / contrasena **** (privilege 15 -> entra directo a modo #)
+
+--- PC-Valparaiso-1 (172.16.40.66) -> R-Santiago (172.16.40.1) ---
+C:\>ssh -l admin 172.16.40.1
+Password: ****
+ ACCESO RESTRINGIDO: Solo personal autorizado - ApexLogistica SpA. Todo acceso es monitoreado y registrado.
+R-Santiago#show users
+    Line       User       Host(s)              Idle       Location
+*390 vty 0     admin      idle                 00:00:00
+R-Santiago#exit
+[Connection to 172.16.40.1 closed by foreign host]
+
+--- PC-Concepcion-1 (172.16.40.98) -> R-Valparaiso (172.16.40.65) ---
+C:\>ssh -l admin 172.16.40.65
+Password: ****
+ ACCESO RESTRINGIDO: Solo personal autorizado - ApexLogistica SpA. ...
+R-Valparaiso#show users
+    Line       User       Host(s)              Idle       Location
+   0 con 0     admin      idle                 00:00:00
+*390 vty 0     admin      idle                 00:00:00
+R-Valparaiso#exit
+[Connection to 172.16.40.65 closed by foreign host]
+
+--- ADMIN (172.16.40.131) -> los 4 routers ---
+Destino        IP              Resultado
+ISP            172.16.40.145   OK - banner + prompt ISP#           (show users: admin en vty 0)
+R-Santiago     172.16.40.129   OK - banner + prompt R-Santiago#    (show users: admin en vty 0)
+R-Valparaiso   172.16.40.65    OK - banner + prompt R-Valparaiso#  (show users: admin en vty 0)
+R-Concepcion   172.16.40.97    OK - banner + prompt R-Concepcion#  (show users: admin en vty 0)
+
+Ejemplo completo (ADMIN -> R-Concepcion):
+C:\>ssh -l admin 172.16.40.97
+Password: ****
+ ACCESO RESTRINGIDO: Solo personal autorizado - ApexLogistica SpA. Todo acceso es monitoreado y registrado.
+R-Concepcion#show users
+    Line       User       Host(s)              Idle       Location
+*390 vty 0     admin      idle                 00:00:00
+R-Concepcion#exit
+[Connection to 172.16.40.97 closed by foreign host]
+
+--- Prueba negativa: Telnet bloqueado ---
+C:\>telnet 172.16.40.129
+Trying 172.16.40.129 ...Open
+[Connection to 172.16.40.129 closed by foreign host]
+=> El puerto 23 abre la conexion TCP, pero el router la cierra de inmediato sin pedir credenciales,
+   porque las lineas VTY solo aceptan SSH (transport input ssh).
+
+Resultado: 6/6 sesiones SSH exitosas desde 3 sedes distintas; Telnet rechazado.

@@ -1,0 +1,49 @@
+=== Etapa 4 - show ip protocols (salida real) ===
+
+ISP:          Routing Protocol is "ospf 1" | Router ID 1.1.1.1 | 1 normal area
+  Routing for Networks: 172.16.40.144 0.0.0.3 area 0 / 172.16.40.148 0.0.0.3 area 0 / 172.16.40.152 0.0.0.3 area 0
+  Routing Information Sources: 1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4 (Distance 110)
+
+R-Santiago#show ip protocols
+Routing Protocol is "ospf 1"
+  Router ID 2.2.2.2
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    172.16.40.0 0.0.0.63 area 0
+    172.16.40.128 0.0.0.15 area 0
+    172.16.40.144 0.0.0.3 area 0
+    172.16.40.156 0.0.0.3 area 0
+  Passive Interface(s):
+    GigabitEthernet0/1
+    GigabitEthernet0/2
+  Routing Information Sources:
+    Gateway         Distance      Last Update
+    1.1.1.1              110      00:00:57
+    2.2.2.2              110      00:00:57
+    3.3.3.3              110      00:00:57
+    4.4.4.4              110      00:00:57
+  Distance: (default is 110)
+
+R-Valparaiso#show ip protocols
+Routing Protocol is "ospf 1"
+  Router ID 3.3.3.3
+  Routing for Networks:
+    172.16.40.64 0.0.0.31 area 0
+    172.16.40.148 0.0.0.3 area 0
+    172.16.40.156 0.0.0.3 area 0
+    172.16.40.160 0.0.0.3 area 0
+  Passive Interface(s):
+    GigabitEthernet0/1
+  Routing Information Sources: 1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4 (Distance 110)
+
+R-Concepcion#show ip protocols
+Routing Protocol is "ospf 1"
+  Router ID 4.4.4.4
+  Routing for Networks:
+    172.16.40.96 0.0.0.31 area 0
+    172.16.40.152 0.0.0.3 area 0
+    172.16.40.160 0.0.0.3 area 0
+  Passive Interface(s):
+    GigabitEthernet0/1
+  Routing Information Sources: 1.1.1.1, 2.2.2.2, 3.3.3.3, 4.4.4.4 (Distance 110)

@@ -1,0 +1,111 @@
+=== Etapa 6 - Prueba de falla: caida del enlace ISP - R-Concepcion (salida real) ===
+
+---------------------------------------------------------------
+1) ESTADO ANTES (normal)
+---------------------------------------------------------------
+R-Concepcion#show ip route   (extracto)
+Gateway of last resort is 172.16.40.153 to network 0.0.0.0
+C       172.16.40.152/30 is directly connected, GigabitEthernet0/0
+S*   0.0.0.0/0 [1/0] via 172.16.40.153            <- ruta por defecto principal (AD 1) al ISP
+
+R-Concepcion#show ip ospf neighbor
+1.1.1.1  FULL/BDR  172.16.40.153  GigabitEthernet0/0   (ISP)
+3.3.3.3  FULL/BDR  172.16.40.161  GigabitEthernet0/2   (R-Valparaiso)
+
+PC-Concepcion-1> tracert 8.8.8.8
+  1   0 ms   0 ms   0 ms   172.16.40.97
+  2   10 ms  0 ms   0 ms   8.8.8.8                  <- 2 saltos: salida directa por su ISP
+
+---------------------------------------------------------------
+2) SIMULACION DE LA FALLA
+---------------------------------------------------------------
+R-Concepcion#configure terminal
+R-Concepcion(config)#interface GigabitEthernet0/0
+R-Concepcion(config-if)#shutdown
+R-Concepcion(config-if)#end
+
+---------------------------------------------------------------
+3) ESTADO DURANTE LA FALLA
+---------------------------------------------------------------
+R-Concepcion#show ip interface brief
+GigabitEthernet0/0     172.16.40.154   YES manual administratively down down
+GigabitEthernet0/1     172.16.40.97    YES manual up                    up
+GigabitEthernet0/2     172.16.40.162   YES manual up                    up
+
+R-Concepcion#show ip ospf neighbor
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+3.3.3.3           1   FULL/BDR        00:00:30    172.16.40.161   GigabitEthernet0/2
+=> El vecino ISP (1.1.1.1) desaparece; queda solo la adyacencia con Valparaiso.
+
+R-Concepcion#show ip route
+Gateway of last resort is 172.16.40.161 to network 0.0.0.0
+     172.16.0.0/16 is variably subnetted, 10 subnets, 5 masks
+O       172.16.40.0/26 [110/66] via 172.16.40.161, GigabitEthernet0/2
+O       172.16.40.64/27 [110/2] via 172.16.40.161, GigabitEthernet0/2
+C       172.16.40.96/27 is directly connected, GigabitEthernet0/1
+L       172.16.40.97/32 is directly connected, GigabitEthernet0/1
+O       172.16.40.128/28 [110/66] via 172.16.40.161, GigabitEthernet0/2
+O       172.16.40.144/30 [110/165] via 172.16.40.161, GigabitEthernet0/2
+O       172.16.40.148/30 [110/101] via 172.16.40.161, GigabitEthernet0/2
+O       172.16.40.156/30 [110/65] via 172.16.40.161, GigabitEthernet0/2
+C       172.16.40.160/30 is directly connected, GigabitEthernet0/2
+L       172.16.40.162/32 is directly connected, GigabitEthernet0/2
+S*   0.0.0.0/0 [210/0] via 172.16.40.161          <- RUTA FLOTANTE (AD 210) instalada
+=> La red 172.16.40.152/30 desaparece y la ruta por defecto AD 1 deja de ser valida (su siguiente
+   salto ya no es alcanzable). La flotante AD 210 hacia Valparaiso, que estaba "en espera", entra a la tabla.
+
+ISP#show ip route   (extracto)
+O       172.16.40.96/27 [110/102] via 172.16.40.150, GigabitEthernet0/1
+O       172.16.40.160/30 [110/101] via 172.16.40.150, GigabitEthernet0/1
+=> El ISP aprende por OSPF que la LAN de Concepcion ahora se alcanza por Valparaiso (antes [110/101] via .154).
+   El trafico de retorno desde Internet tambien queda resuelto automaticamente.
+
+PC-Concepcion-1> tracert 8.8.8.8
+  1   6 ms   0 ms   0 ms   172.16.40.97     R-Concepcion
+  2   0 ms   0 ms   0 ms   172.16.40.161    R-Valparaiso   <- nuevo salto
+  3   0 ms   0 ms   7 ms   8.8.8.8          ISP (via S* de R-Valparaiso)
+
+PC-Concepcion-1> ping 8.8.8.8
+Reply from 8.8.8.8: bytes=32 time=7ms TTL=253   (TTL 253: un router mas que antes, 254)
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)
+
+PC-Santiago-1> ping 172.16.40.98   (comunicacion entre sedes no se ve afectada)
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss)
+
+CONCLUSION: ante la caida del enlace WAN de Concepcion, la sede mantiene salida a Internet
+(ruta estatica flotante AD 210) y el ISP encuentra el camino de retorno (OSPF), sin
+intervencion manual y sin perdida de paquetes en las pruebas.
+
+---------------------------------------------------------------
+4) RESTAURACION
+---------------------------------------------------------------
+R-Concepcion#configure terminal
+R-Concepcion(config)#interface GigabitEthernet0/0
+R-Concepcion(config-if)#no shutdown
+R-Concepcion(config-if)#end
+R-Concepcion#copy running-config startup-config
+
+---------------------------------------------------------------
+5) ESTADO DESPUES (restaurado)
+---------------------------------------------------------------
+R-Concepcion#show ip interface brief
+GigabitEthernet0/0     172.16.40.154   YES manual up                    up
+GigabitEthernet0/1     172.16.40.97    YES manual up                    up
+GigabitEthernet0/2     172.16.40.162   YES manual up                    up
+
+R-Concepcion#show ip ospf neighbor
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+1.1.1.1           1   FULL/BDR        00:00:35    172.16.40.153   GigabitEthernet0/0   <- vecino ISP recuperado
+3.3.3.3           1   FULL/BDR        00:00:32    172.16.40.161   GigabitEthernet0/2
+
+R-Concepcion#show ip route   (extracto)
+Gateway of last resort is 172.16.40.153 to network 0.0.0.0
+C       172.16.40.152/30 is directly connected, GigabitEthernet0/0
+L       172.16.40.154/32 is directly connected, GigabitEthernet0/0
+S*   0.0.0.0/0 [1/0] via 172.16.40.153        <- vuelve la ruta principal AD 1; la flotante sale de la tabla
+
+PC-Concepcion-1> tracert 8.8.8.8
+  1   12 ms   0 ms   0 ms   172.16.40.97
+  2   0 ms    0 ms   0 ms   8.8.8.8          <- de nuevo 2 saltos, salida directa por su ISP
+
+Capturas: E6_07/E6_08 (ANTES), E6_09..E6_12 (DURANTE), E6_13 (DESPUES, canvas con todos los enlaces en verde).

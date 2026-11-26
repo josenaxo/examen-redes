@@ -1,0 +1,87 @@
+<html>
+<head><title>Documentaci&oacute;n T&eacute;cnica - ApexLog&iacute;stica SpA</title></head>
+<body bgcolor="#f4f6f8">
+<table width="100%" bgcolor="#0b3d66" cellpadding="12"><tr><td>
+<font color="#ffffff" size="5"><b>Documentaci&oacute;n T&eacute;cnica / Investigaci&oacute;n</b></font><br>
+<font color="#cfe3f5">Red corporativa ApexLog&iacute;stica SpA</font>
+</td></tr></table>
+
+<p><a href="index.html">Inicio</a> | <a href="documentacion.html">Documentaci&oacute;n</a></p>
+
+<h2>1. Dise&ntilde;o de red y tabla VLSM</h2>
+<p>La red une tres sedes (Santiago, Valpara&iacute;so y Concepci&oacute;n) con un proveedor de Internet (ISP)
+y con enlaces inter-sucursales Santiago-Valpara&iacute;so (serial) y Valpara&iacute;so-Concepci&oacute;n (Gigabit).
+Se usa el bloque privado 172.16.40.0/22 (RFC 1918), dividido con VLSM: las subredes se asignan de mayor
+a menor cantidad de hosts y cada una recibe el prefijo m&aacute;s peque&ntilde;o que cubre su demanda
+(hosts = 2<sup>h</sup> - 2).</p>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#dde7f0"><th>Subred</th><th>Hosts</th><th>Red</th><th>M&aacute;scara</th><th>Rango usable</th><th>Gateway</th><th>Broadcast</th></tr>
+<tr><td>LAN Santiago</td><td>60</td><td>172.16.40.0/26</td><td>255.255.255.192</td><td>.1 - .62</td><td>.1</td><td>.63</td></tr>
+<tr><td>LAN Valpara&iacute;so</td><td>30</td><td>172.16.40.64/27</td><td>255.255.255.224</td><td>.65 - .94</td><td>.65</td><td>.95</td></tr>
+<tr><td>LAN Concepci&oacute;n</td><td>20</td><td>172.16.40.96/27</td><td>255.255.255.224</td><td>.97 - .126</td><td>.97</td><td>.127</td></tr>
+<tr><td>Servidores/Mgmt</td><td>10</td><td>172.16.40.128/28</td><td>255.255.255.240</td><td>.129 - .142</td><td>.129</td><td>.143</td></tr>
+<tr><td>ISP-Santiago</td><td>2</td><td>172.16.40.144/30</td><td>255.255.255.252</td><td>.145 - .146</td><td>-</td><td>.147</td></tr>
+<tr><td>ISP-Valpara&iacute;so</td><td>2</td><td>172.16.40.148/30</td><td>255.255.255.252</td><td>.149 - .150</td><td>-</td><td>.151</td></tr>
+<tr><td>ISP-Concepci&oacute;n</td><td>2</td><td>172.16.40.152/30</td><td>255.255.255.252</td><td>.153 - .154</td><td>-</td><td>.155</td></tr>
+<tr><td>Santiago-Valpara&iacute;so</td><td>2</td><td>172.16.40.156/30</td><td>255.255.255.252</td><td>.157 - .158</td><td>-</td><td>.159</td></tr>
+<tr><td>Valpara&iacute;so-Concepci&oacute;n</td><td>2</td><td>172.16.40.160/30</td><td>255.255.255.252</td><td>.161 - .162</td><td>-</td><td>.163</td></tr>
+</table>
+<p>Espacio libre para crecimiento: 172.16.40.164 - 172.16.43.255. La IP 172.16.40.132 queda reservada para
+el futuro Domain Controller. La LAN de Valpara&iacute;so (/27) queda justo en 30 hosts: si crece se migrar&aacute;
+a un /26 tomado del espacio libre.</p>
+
+<h2>2. Enrutamiento est&aacute;tico + OSPF: por qu&eacute; se combinan</h2>
+<p><b>OSPF</b> (proceso 1, &aacute;rea 0, Router-ID 1.1.1.1 a 4.4.4.4) anuncia autom&aacute;ticamente todas las redes
+internas y recalcula los caminos si un enlace cae, sin intervenci&oacute;n manual. Las interfaces LAN son
+<i>passive-interface</i> para no enviar paquetes OSPF hacia los equipos de usuario.</p>
+<p>Los enlaces con el ISP tienen <b>costo OSPF 100</b>. As&iacute; el tr&aacute;fico entre sedes prefiere los enlaces
+inter-sucursales (por ejemplo, Santiago-Concepci&oacute;n por Valpara&iacute;so cuesta 66 contra 201 por el ISP).</p>
+<p>Las <b>rutas est&aacute;ticas</b> controlan la salida a Internet: cada sucursal tiene una ruta por defecto hacia
+su ISP (distancia administrativa 1) y una <b>ruta flotante</b> de respaldo por el enlace inter-sucursal
+(AD 210), que solo se instala si cae la principal. El ISP tiene una ruta resumida 172.16.40.0/22 con AD 250
+como &uacute;ltimo respaldo. La combinaci&oacute;n entrega convergencia autom&aacute;tica dentro de la empresa y
+control expl&iacute;cito y predecible sobre la salida a Internet.</p>
+
+<h2>3. SSH y seguridad b&aacute;sica</h2>
+<ul>
+<li>Banner MOTD de acceso restringido y contrase&ntilde;as guardadas con hash (<i>enable secret</i>, <i>username ... secret</i>) m&aacute;s <i>service password-encryption</i>.</li>
+<li>Usuario local con privilegio 15 y <i>login local</i> en consola y en las l&iacute;neas VTY.</li>
+<li>SSH versi&oacute;n 2 con llaves RSA de 1024 bits y dominio apexlogistica.local. Las l&iacute;neas VTY solo aceptan SSH (<i>transport input ssh</i>), por lo que Telnet, que viaja en texto plano, queda bloqueado.</li>
+<li><i>exec-timeout</i> de 5 minutos para cerrar sesiones inactivas.</li>
+</ul>
+<p>SSH cifra toda la sesi&oacute;n, autentica al servidor con su llave p&uacute;blica y protege las credenciales del
+administrador cuando gestiona los routers en forma remota desde la PC ADMIN o desde otra sede.</p>
+
+<h2>4. Administraci&oacute;n centralizada de usuarios (Active Directory / Samba, GPO)</h2>
+<p>Un servicio de directorio (Microsoft Active Directory Domain Services, o Samba configurado como
+controlador de dominio compatible con AD) guarda en un solo lugar las cuentas, grupos y equipos de las tres
+sedes. Esto permite:</p>
+<ul>
+<li>Inicio de sesi&oacute;n &uacute;nico: el mismo usuario y contrase&ntilde;a en cualquier sede.</li>
+<li>Altas y bajas inmediatas: al deshabilitar una cuenta, el acceso se corta en toda la empresa.</li>
+<li>Pol&iacute;ticas de grupo (GPO) aplicadas de forma uniforme: complejidad y caducidad de contrase&ntilde;as, bloqueo de cuenta, bloqueo de pantalla, restricciones de software y mapeo de recursos.</li>
+<li>Auditor&iacute;a centralizada de accesos y cumplimiento de m&iacute;nimo privilegio mediante grupos.</li>
+</ul>
+<p>El controlador de dominio usar&aacute; la IP reservada 172.16.40.132 en la red de servidores y depende del DNS
+para que los clientes lo encuentren.</p>
+
+<h2>5. Resumen del plan de continuidad</h2>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr bgcolor="#dde7f0"><th>Escenario</th><th>Respuesta</th><th>Prevenci&oacute;n</th></tr>
+<tr><td>Ca&iacute;da de enlace WAN o inter-sucursal</td><td>OSPF recalcula la ruta y se activa la ruta est&aacute;tica flotante (AD 210)</td><td>Topolog&iacute;a con caminos redundantes</td></tr>
+<tr><td>Ca&iacute;da del Domain Controller</td><td>Atenci&oacute;n de autenticaci&oacute;n desde un DC secundario; restauraci&oacute;n desde snapshot</td><td>DC secundario y snapshots de VM</td></tr>
+<tr><td>Ca&iacute;da del servidor web</td><td>Restaurar el sitio desde respaldo en un servidor alternativo y actualizar el registro DNS</td><td>Respaldo peri&oacute;dico del sitio</td></tr>
+</table>
+
+<h2>6. Referencias (APA 7)</h2>
+<p>Fuller, V., &amp; Li, T. (2006). <i>Classless Inter-domain Routing (CIDR): The Internet address assignment and aggregation plan</i> (RFC 4632). Internet Engineering Task Force. https://doi.org/10.17487/RFC4632</p>
+<p>Mockapetris, P. (1987). <i>Domain names - Implementation and specification</i> (RFC 1035). Internet Engineering Task Force. https://doi.org/10.17487/RFC1035</p>
+<p>Moy, J. (1998). <i>OSPF Version 2</i> (RFC 2328). Internet Engineering Task Force. https://doi.org/10.17487/RFC2328</p>
+<p>Rekhter, Y., Moskowitz, B., Karrenberg, D., de Groot, G. J., &amp; Lear, E. (1996). <i>Address allocation for private internets</i> (RFC 1918). Internet Engineering Task Force. https://doi.org/10.17487/RFC1918</p>
+<p>Ylonen, T., &amp; Lonvick, C. (Ed.). (2006). <i>The Secure Shell (SSH) protocol architecture</i> (RFC 4251). Internet Engineering Task Force. https://doi.org/10.17487/RFC4251</p>
+<p>Cisco Networking Academy. (s.f.). <i>CCNA: Enterprise Networking, Security, and Automation</i> [Curso en l&iacute;nea]. Cisco Systems. https://www.netacad.com</p>
+
+<hr>
+<font size="2" color="#555555">ApexLog&iacute;stica SpA - Documento t&eacute;cnico interno - SRV-Principal 172.16.40.130</font>
+</body>
+</html>

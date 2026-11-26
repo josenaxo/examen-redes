@@ -1,0 +1,44 @@
+=== Etapa 1 - Topologia: lectura real desde Packet Tracer (pt_query_topology) ===
+Fecha: 2026-11-25
+
+DISPOSITIVOS (16)
+  ISP              Cisco 2911   Gi0/0, Gi0/1, Gi0/2 (+ Loopback0 8.8.8.8/32 en Etapa 2)
+  R-Santiago       Cisco 2911 + HWIC-2T (slot 0/0)   Gi0/0, Gi0/1, Gi0/2, Se0/0/0, Se0/0/1
+  R-Valparaiso     Cisco 2911 + HWIC-2T (slot 0/0)   Gi0/0, Gi0/1, Gi0/2, Se0/0/0, Se0/0/1
+  R-Concepcion     Cisco 2911   Gi0/0, Gi0/1, Gi0/2
+  SW-Santiago      Cisco 2960-24TT
+  SW-Servidores    Cisco 2960-24TT
+  SW-Valparaiso    Cisco 2960-24TT
+  SW-Concepcion    Cisco 2960-24TT
+  PC-Santiago-1, PC-Santiago-2, ADMIN, PC-Valparaiso-1, PC-Valparaiso-2,
+  PC-Concepcion-1, PC-Concepcion-2   PC-PT (FastEthernet0)
+  SRV-Principal    Server-PT (FastEthernet0)
+
+ENLACES (17)  origen <--[cable]--> destino            uso
+  ISP:Gi0/0           <--[cross]-->    R-Santiago:Gi0/0       WAN ISP-Santiago     172.16.40.144/30
+  ISP:Gi0/1           <--[cross]-->    R-Valparaiso:Gi0/0     WAN ISP-Valparaiso   172.16.40.148/30
+  ISP:Gi0/2           <--[cross]-->    R-Concepcion:Gi0/0     WAN ISP-Concepcion   172.16.40.152/30
+  R-Santiago:Se0/0/0  <--[serial]-->   R-Valparaiso:Se0/0/0   Inter-sucursal       172.16.40.156/30
+  R-Valparaiso:Gi0/2  <--[cross]-->    R-Concepcion:Gi0/2     Inter-sucursal       172.16.40.160/30
+  R-Santiago:Gi0/1    <--[straight]--> SW-Santiago:Gi0/1      LAN Santiago         172.16.40.0/26
+  R-Santiago:Gi0/2    <--[straight]--> SW-Servidores:Gi0/1    Servidores/Mgmt      172.16.40.128/28
+  R-Valparaiso:Gi0/1  <--[straight]--> SW-Valparaiso:Gi0/1    LAN Valparaiso       172.16.40.64/27
+  R-Concepcion:Gi0/1  <--[straight]--> SW-Concepcion:Gi0/1    LAN Concepcion       172.16.40.96/27
+  PC-Santiago-1:Fa0   <--[straight]--> SW-Santiago:Fa0/1
+  PC-Santiago-2:Fa0   <--[straight]--> SW-Santiago:Fa0/2
+  SRV-Principal:Fa0   <--[straight]--> SW-Servidores:Fa0/1
+  ADMIN:Fa0           <--[straight]--> SW-Servidores:Fa0/2
+  PC-Valparaiso-1:Fa0 <--[straight]--> SW-Valparaiso:Fa0/1
+  PC-Valparaiso-2:Fa0 <--[straight]--> SW-Valparaiso:Fa0/2
+  PC-Concepcion-1:Fa0 <--[straight]--> SW-Concepcion:Fa0/1
+  PC-Concepcion-2:Fa0 <--[straight]--> SW-Concepcion:Fa0/2
+
+No existe enlace directo Santiago-Concepcion (segun diagrama de referencia).
+
+JUSTIFICACION DEL HARDWARE
+- Cisco 2911: 3 puertos GigabitEthernet integrados y 4 ranuras EHWIC, lo que permite ampliar interfaces.
+- R-Santiago necesita 4 interfaces (ISP, LAN, servidores, Valparaiso) y R-Valparaiso 4 (ISP, LAN,
+  Santiago, Concepcion): se agrega HWIC-2T (2 puertos seriales) y el enlace WAN Santiago-Valparaiso
+  se implementa como serial punto a punto.
+- R-Concepcion (3 interfaces) e ISP (3 enlaces + Loopback logica) caben en los 3 Gi integrados.
+- Cable cruzado entre routers (mismo tipo de equipo), directo router-switch y switch-host.

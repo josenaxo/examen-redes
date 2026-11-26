@@ -1,0 +1,55 @@
+=== Etapa 4 - Configuracion de enrutamiento aplicada (aceptada sin errores en los 4 routers) ===
+
+--- ISP ---
+router ospf 1
+ router-id 1.1.1.1
+ network 172.16.40.144 0.0.0.3 area 0
+ network 172.16.40.148 0.0.0.3 area 0
+ network 172.16.40.152 0.0.0.3 area 0
+interface GigabitEthernet0/0 / 0/1 / 0/2
+ ip ospf cost 100
+ip route 172.16.40.0 255.255.252.0 172.16.40.146 250     ! resumen /22 de respaldo (AD 250)
+! Loopback0 8.8.8.8/32 NO se anuncia en OSPF: simula Internet y se alcanza por la ruta por defecto estatica.
+
+--- R-Santiago ---
+router ospf 1
+ router-id 2.2.2.2
+ network 172.16.40.0 0.0.0.63 area 0       ! LAN /26
+ network 172.16.40.128 0.0.0.15 area 0     ! Servidores /28
+ network 172.16.40.144 0.0.0.3 area 0      ! ISP /30
+ network 172.16.40.156 0.0.0.3 area 0      ! Stgo-Valpo /30
+ passive-interface GigabitEthernet0/1
+ passive-interface GigabitEthernet0/2
+interface GigabitEthernet0/0
+ ip ospf cost 100
+ip route 0.0.0.0 0.0.0.0 172.16.40.145            ! por defecto al ISP (AD 1)
+ip route 0.0.0.0 0.0.0.0 172.16.40.158 210        ! flotante por Valparaiso (AD 210)
+
+--- R-Valparaiso ---
+router ospf 1
+ router-id 3.3.3.3
+ network 172.16.40.64 0.0.0.31 area 0      ! LAN /27
+ network 172.16.40.148 0.0.0.3 area 0      ! ISP /30
+ network 172.16.40.156 0.0.0.3 area 0      ! Stgo-Valpo /30
+ network 172.16.40.160 0.0.0.3 area 0      ! Valpo-Conce /30
+ passive-interface GigabitEthernet0/1
+interface GigabitEthernet0/0
+ ip ospf cost 100
+ip route 0.0.0.0 0.0.0.0 172.16.40.149
+ip route 0.0.0.0 0.0.0.0 172.16.40.157 210        ! flotante por Santiago
+
+--- R-Concepcion ---
+router ospf 1
+ router-id 4.4.4.4
+ network 172.16.40.96 0.0.0.31 area 0      ! LAN /27
+ network 172.16.40.152 0.0.0.3 area 0      ! ISP /30
+ network 172.16.40.160 0.0.0.3 area 0      ! Valpo-Conce /30
+ passive-interface GigabitEthernet0/1
+interface GigabitEthernet0/0
+ ip ospf cost 100
+ip route 0.0.0.0 0.0.0.0 172.16.40.153
+ip route 0.0.0.0 0.0.0.0 172.16.40.161 210        ! flotante por Valparaiso
+
+Costos OSPF (ancho de banda de referencia 100 Mbps en PT):
+  GigabitEthernet = 1 | Serial 1544 kbps = 64 | enlaces con ISP = 100 (forzado con ip ospf cost)
+  Santiago -> LAN Concepcion: via serial+Valpo = 64+1+1 = 66   vs  via ISP = 100+100+1 = 201  -> gana inter-sucursal
